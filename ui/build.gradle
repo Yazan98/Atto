@@ -1,0 +1,153 @@
+def artifactID = "atto-ui-ktx"
+def rootDes = "Atto UI is the UserInterface Layer With Screens and Fragments"
+def repoName = "Atto-UI"
+def uploadUrl = "Github"
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.core:core-ktx:1.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    implementation group: 'androidx.lifecycle', name: 'lifecycle-viewmodel', version: '2.2.0-alpha03'
+    implementation group: 'androidx.lifecycle', name: 'lifecycle-extensions', version: '2.2.0-alpha03'
+    implementation group: 'androidx.lifecycle', name: 'lifecycle-livedata', version: '2.2.0-alpha03'
+
+    implementation project(":logic")
+}
+
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            packaging rootProject.ext.PackagingType
+            name rootProject.ext.LibraryName
+            description "${rootDes}"
+            url rootProject.ext.GithubUrl
+
+            artifactId "${artifactID}"
+            groupId rootProject.ext.LibraryGroup
+            version rootProject.ext.LibraryVersion
+
+            licenses {
+
+                license {
+                    name rootProject.ext.licenseName
+                    url rootProject.ext.licenseUrl
+                    distribution rootProject.ext.distribution
+                }
+            }
+
+            scm {
+                connection rootProject.ext.GitUrl
+                url rootProject.ext.GithubUrl
+            }
+
+            developers {
+
+                developer {
+                    id rootProject.ext.DeveloperID
+                    name rootProject.ext.DeveloperName
+                    email rootProject.ext.DeveloperEmail
+                }
+
+            }
+
+        }
+    }
+}
+
+
+bintray {
+
+    user = "${rootProject.ext.BintrayUsername}"
+    key = "${rootProject.ext.BintrayApiKey}"
+
+    configurations = ['archives']
+    publications = ['Production']
+
+    publish = true
+
+    pkg {
+        repo = rootProject.ext.LibraryName
+        name = "${repoName}"
+        desc = "${rootDes}"
+
+        dryRun = false
+        publish = true
+        override = true
+
+        userOrg = user
+        licenses = ["${rootProject.ext.licenseName}"]
+        vcsUrl = rootProject.ext.GitUrl
+        issueTrackerUrl = rootProject.ext.GithubIssuesUrl
+
+        publicDownloadNumbers = true
+
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "${repoName}"
+            url = uri("https://github.com/Atto-io/Atto-Android")
+            credentials {
+                username = "${rootProject.ext.githubUsername}"
+                password ""
+            }
+        }
+    }
+    publications {
+        if (uploadUrl.equals("Bintray")) {
+            Production(MavenPublication) {
+                artifact("$buildDir/outputs/aar/core-release.aar")
+                groupId rootProject.ext.LibraryGroup
+                artifactId "${artifactID}"
+                version rootProject.ext.LibraryVersion
+                pom {
+                    url = "https://github.com/Atto-io/Atto-Android"
+                }
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    configurations.compile.allDependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        } else {
+            mavenJava(MavenPublication) {
+                pom {
+                    artifact("$buildDir/outputs/aar/ui-release.aar")
+                    groupId rootProject.ext.LibraryGroup
+                    artifactId "${artifactID}"
+                    version rootProject.ext.LibraryVersion
+                    name = "${repoName}"
+                    description = 'Core Layer To Build Atto Applications'
+                    url = "https://github.com/Atto-io/Atto-Android"
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                }
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    configurations.compile.allDependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
+}

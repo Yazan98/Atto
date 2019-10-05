@@ -1,0 +1,181 @@
+def artifactID = "atto-extras-ktx"
+def rootDes = "Atto Extras Is An UI Layer WIth All Common Operations With UI Utils"
+def repoName = "Atto-Extras"
+def uploadUrl = "Github"
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.core:core-ktx:1.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+
+    implementation "com.google.firebase:firebase-storage:19.0.0"
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.facebook.fresco:fresco:2.0.0'
+    implementation 'com.google.firebase:firebase-firestore:21.0.0'
+
+    implementation "com.google.firebase:firebase-firestore:21.0.0"
+
+    implementation "com.android.support:multidex:1.0.3"
+    implementation "com.jakewharton.timber:timber:4.7.1"
+    implementation "com.squareup.leakcanary:leakcanary-android:2.0-alpha-2"
+
+    implementation "com.google.firebase:firebase-core:17.1.0"
+    implementation "com.google.firebase:firebase-auth:19.0.0"
+    implementation "com.google.firebase:firebase-messaging:20.0.0"
+    implementation "com.google.firebase:firebase-storage:19.0.0"
+    implementation "com.crashlytics.sdk.android:crashlytics:2.10.1"
+    implementation "com.google.firebase:firebase-database:19.0.0"
+    implementation "com.firebaseui:firebase-ui-auth:5.0.0"
+
+    implementation "com.f2prateek.rx.preferences2:rx-preferences:2.0.0"
+    implementation "com.google.android.gms:play-services-location:17.0.0"
+
+
+//    implementation "com.google.android.material:material:1.0.0-rc01"
+
+    implementation "com.squareup.leakcanary:leakcanary-android:2.0-alpha-1"
+    implementation "com.squareup.leakcanary:leaksentry:2.0-alpha-1"
+
+}
+
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            packaging rootProject.ext.PackagingType
+            name rootProject.ext.LibraryName
+            description "${rootDes}"
+            url rootProject.ext.GithubUrl
+
+            artifactId "${artifactID}"
+            groupId rootProject.ext.LibraryGroup
+            version rootProject.ext.LibraryVersion
+
+            licenses {
+
+                license {
+                    name rootProject.ext.licenseName
+                    url rootProject.ext.licenseUrl
+                    distribution rootProject.ext.distribution
+                }
+            }
+
+            scm {
+                connection rootProject.ext.GitUrl
+                url rootProject.ext.GithubUrl
+            }
+
+            developers {
+
+                developer {
+                    id rootProject.ext.DeveloperID
+                    name rootProject.ext.DeveloperName
+                    email rootProject.ext.DeveloperEmail
+                }
+
+            }
+
+        }
+    }
+}
+
+
+bintray {
+
+    user = "${rootProject.ext.BintrayUsername}"
+    key = "${rootProject.ext.BintrayApiKey}"
+
+    configurations = ['archives']
+    publications = ['Production']
+
+    publish = true
+
+    pkg {
+        repo = rootProject.ext.LibraryName
+        name = "${repoName}"
+        desc = "${rootDes}"
+
+        dryRun = false
+        publish = true
+        override = true
+
+        userOrg = user
+        licenses = ["${rootProject.ext.licenseName}"]
+        vcsUrl = rootProject.ext.GitUrl
+        issueTrackerUrl = rootProject.ext.GithubIssuesUrl
+
+        publicDownloadNumbers = true
+
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "${repoName}"
+            url = uri("https://github.com/Atto-io/Atto-Android")
+            credentials {
+                username = "${rootProject.ext.githubUsername}"
+                password ""
+            }
+        }
+    }
+    publications {
+        if (uploadUrl.equals("Bintray")) {
+            Production(MavenPublication) {
+                artifact("$buildDir/outputs/aar/core-release.aar")
+                groupId rootProject.ext.LibraryGroup
+                artifactId "${artifactID}"
+                version rootProject.ext.LibraryVersion
+                pom {
+                    url = "https://github.com/Atto-io/Atto-Android"
+                }
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    configurations.compile.allDependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        } else {
+            mavenJava(MavenPublication) {
+                pom {
+                    artifact("$buildDir/outputs/aar/extras-release.aar")
+                    groupId rootProject.ext.LibraryGroup
+                    artifactId "${artifactID}"
+                    version rootProject.ext.LibraryVersion
+                    name = "${repoName}"
+                    description = 'Core Layer To Build Atto Applications'
+                    url = "https://github.com/Atto-io/Atto-Android"
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                }
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    configurations.compile.allDependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+
+    }
+}

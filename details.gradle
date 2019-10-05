@@ -1,0 +1,25 @@
+ext {
+    LibraryGroup = "io.atto"
+    LibraryVersion = "1.0.6"
+
+    PackagingType = "arr"
+    LibraryName = "Atto"
+    GithubUrl = "https://github.com/Atto-io/Atto-Android"
+    GitUrl = "https://github.com/Atto-io/Atto-Android.git"
+    licenseName = "Apache-2.0"
+    licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
+    distribution = 'repo'
+    GithubIssuesUrl = "https://github.com/Atto-io/Atto-Android/issues"
+    DeveloperID = "yt98"
+    DeveloperName = "Yazan Tarifi"
+    DeveloperEmail = ""
+    Description = "Architecture To Build Android Applications With RxJava"
+
+
+    BintrayUsername = "yt98"
+    BintrayApiKey = ""
+
+    githubUsername = "Yazan98"
+    githubToken = ""
+
+}
